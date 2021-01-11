@@ -65,4 +65,61 @@ describe("Model Tests", () => {
 
     await expect(user.save()).to.be.rejectedWith(WrongInstanciate);
   });
+
+  it("Save and get model", async () => {
+    class User extends Model {
+      name = Field.Text();
+    }
+
+    const user = User.init();
+    user.name = "azeem";
+    await user.save();
+
+    const doc = await User.collection.get(user.key);
+
+    assert.equal(doc.name, user.name);
+    chai.assert.isString(doc.id);
+  });
+
+  it("Filter document by where clause", async () => {
+    class FilterWhereClause extends Model {
+      name = Field.Text();
+    }
+
+    const u1 = FilterWhereClause.init();
+    u1.name = "test-filter-clause";
+    await u1.save();
+
+    const u2 = FilterWhereClause.init();
+    u2.name = "test-filter-clause";
+    await u2.save();
+
+    const docs = await FilterWhereClause.collection
+      .where("name", "==", "test-filter-clause")
+      .fetch();
+    for (const doc of docs) {
+      assert.equal(doc.name, "test-filter-clause");
+    }
+  });
+
+  it("Filter document by where clause with changed db name", async () => {
+    class FilterWhereClauseChangedName extends Model {
+      name = Field.Text({ name: "customName" });
+    }
+
+    const u1 = FilterWhereClauseChangedName.init();
+    u1.name = "test-filter-clause-changed-name";
+    await u1.save();
+
+    const u2 = FilterWhereClauseChangedName.init();
+    u2.name = "test-filter-clause-changed-name";
+    await u2.save();
+
+    const docs = await FilterWhereClauseChangedName.collection
+      .where("name", "==", "test-filter-clause-changed-name")
+      .fetch();
+    for (const doc of docs) {
+      assert.equal(doc.name, "test-filter-clause-changed-name");
+    }
+  });
 });
