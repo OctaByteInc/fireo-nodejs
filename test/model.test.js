@@ -122,4 +122,36 @@ describe("Model Tests", () => {
       assert.equal(doc.name, "test-filter-clause-changed-name");
     }
   });
+
+  it("Upsert document without document creation", async () => {
+    class UpsertModel extends Model {
+      name = Field.Text();
+      address = Field.Text();
+    }
+
+    const d1 = UpsertModel.init();
+    d1.name = "azeem";
+    await d1.upsert();
+
+    const doc = await UpsertModel.collection.get(d1.key);
+    assert.equal(doc.name, "azeem");
+  });
+
+  it("Upsert document with doc already exist", async () => {
+    class UpsertModel extends Model {
+      name = Field.Text();
+      address = Field.Text();
+    }
+
+    const d1 = UpsertModel.init();
+    d1.name = "azeem";
+    await d1.upsert();
+
+    d1.address = "user-address";
+    await d1.upsert();
+
+    const doc = await UpsertModel.collection.get(d1.key);
+    assert.equal(doc.name, "azeem");
+    assert.equal(doc.address, "user-address");
+  });
 });
