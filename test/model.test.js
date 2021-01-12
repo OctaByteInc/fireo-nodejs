@@ -154,4 +154,86 @@ describe("Model Tests", () => {
     assert.equal(doc.name, "azeem");
     assert.equal(doc.address, "user-address");
   });
+
+  it("Update Model with same model object", async () => {
+    class UpdateModel extends Model {
+      name = Field.Text();
+      address = Field.Text();
+    }
+
+    const d1 = UpdateModel.init();
+    d1.name = "azeem";
+    d1.address = "user-address";
+    await d1.save();
+
+    d1.address = "address-updated";
+    await d1.update();
+
+    const doc = await UpdateModel.collection.get(d1.key);
+    assert.equal(doc.name, "azeem");
+    assert.equal(doc.address, "address-updated");
+  });
+
+  it("Update Model with key", async () => {
+    class UpdateModel extends Model {
+      name = Field.Text();
+      address = Field.Text();
+    }
+
+    const d1 = UpdateModel.init();
+    d1.name = "azeem";
+    d1.address = "user-address";
+    await d1.save();
+
+    const d2 = UpdateModel.init();
+    d2.address = "address-changed";
+    await d2.update(d1.key);
+
+    const doc = await UpdateModel.collection.get(d1.key);
+    assert.equal(doc.name, "azeem");
+    assert.equal(doc.address, "address-changed");
+  });
+
+  it("Update Model with already defined IDField and same object", async () => {
+    class UpdateModel extends Model {
+      id = Field.ID();
+      name = Field.Text();
+      address = Field.Text();
+    }
+
+    const d1 = UpdateModel.init();
+    d1.id = "custom-id";
+    d1.name = "azeem";
+    d1.address = "user-address";
+    await d1.save();
+
+    d1.address = "address-changed";
+    await d1.update();
+
+    const doc = await UpdateModel.collection.get(d1.key);
+    assert.equal(doc.name, "azeem");
+    assert.equal(doc.address, "address-changed");
+  });
+
+  it("Update Model with already defined IDField and key", async () => {
+    class UpdateModel extends Model {
+      id = Field.ID();
+      name = Field.Text();
+      address = Field.Text();
+    }
+
+    const d1 = UpdateModel.init();
+    d1.id = "custom-doc-id";
+    d1.name = "azeem";
+    d1.address = "user-address";
+    await d1.save();
+
+    const d2 = UpdateModel.init();
+    d2.address = "address-changed";
+    await d2.update(d1.key);
+
+    const doc = await UpdateModel.collection.get(d1.key);
+    assert.equal(doc.name, "azeem");
+    assert.equal(doc.address, "address-changed");
+  });
 });
